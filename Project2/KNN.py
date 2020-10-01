@@ -11,7 +11,7 @@ class KNN:
         if self.problem == "classification":
             self.classification(self.file_norm)
         if self.problem == 'regression':
-            self.regression()
+            self.regression(self.file_norm)
 
     def classification(self, file):
 
@@ -26,7 +26,7 @@ class KNN:
             test = file.iloc[cv::10]
             test.reset_index(drop=True, inplace=True)
             train = pd.concat([file, test]).drop_duplicates(keep=False)     #getting rid of too much
-            test.reset_index(drop=True, inplace=True)
+            train.reset_index(drop=True, inplace=True)
 
             distanceM = pd.DataFrame(index=test.index.values, columns=train.index.values)
             for testrow, testing in test.iterrows():
@@ -44,14 +44,27 @@ class KNN:
                     distanceM.at[testrow, trainrow] = distance
 
             for index, val in distanceM.iterrows():
-                min_val = val.min()      #THIS SHOULD WORK, WHY NOT
-                col = distanceM.columns[(distanceM == min_val).iloc[index]].astype(int)
-                total += 1
-                if(test['class'][index] == train['class'][col[0]]):
-                    correct += 1
-            print(correct/total * 100,"%")
+                total += 1          #increments count of test points
+                min_val = val.min()      #gets value of the minimum values for each test point
+                col = distanceM.columns[(distanceM == min_val).iloc[index]].astype(int) #returns training set index for minimum value for each test point
+                if(test['class'][index] == train['class'][col[0]]): #sees if it has been classified correctly
+                    correct += 1    #increments count of correct classifications
+            print(correct/total * 100,"%")  #prints percentage of test points that have been classified correctly
 
 
 
-    def regression(self, VDM, file):
-        pass
+    def regression(self, file):
+        file.sort_values(by="class", inplace=True)
+        file.reset_index(drop=True, inplace=True)
+
+        print(file)
+
+        for cv in range(10):
+            test = file.iloc[cv::10]
+            test.reset_index(drop=True, inplace=True)
+            train = pd.concat([file, test]).drop_duplicates(keep=False)  # getting rid of too much, same as above
+            train.reset_index(drop=True, inplace=True)
+
+            for testrow, testing in test.iterrow():
+                for trainrow, training in train.iterrows():
+                    print(training)
