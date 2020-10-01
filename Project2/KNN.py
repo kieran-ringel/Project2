@@ -1,54 +1,50 @@
 import pandas as pd
 class KNN:
-    def __init__(self, file, problem, discrete):
-        self.file = file
+    def __init__(self, problem, VDMdict, file_norm, discrete):
         self.problem = problem
+        self.VDMdict = VDMdict
+        self.file_norm = file_norm
         self.discrete = discrete
-        self.check_discrete(discrete)
+        self.startKNN()
 
-    def check_discrete(self, discrete):
-        if discrete != [-1]:
-            self.VDMdiscrete(self.file, self.discrete)
+    def startKNN(self):
+        if self.problem == "classification":
+            self.classification(self.file_norm)
+        if self.problem == 'regression':
+            self.regression()
 
-    def VDMdiscrete(self, file, discrete):
-        VDMdictionary = {}
-        for features in range(len(discrete)):   #discrete[feature] will give index of feature that is discrete
-            column = discrete[features]
-            features = []
-            classes = []
-            for row in range(file.shape[0]):
-                if file[column][row] not in features:
-                    features.append(file[column][row])
-                if file["class"][row] not in classes:
-                    classes.append(file["class"][row])
-            VDM = pd.DataFrame(index = features, columns = features)
-            for feat in range(len(features)):
-                for feat2 in range(len(features)):
-                    running_sum = 0
-                    for clas in range(len(classes)):
-                        ci = self.ci(column, features[feat])
-                        cia = self.cia(column, classes[clas], features[feat])
-                        cj = self.ci(column, features[feat2])
-                        cja = self.cia(column, classes[clas], features[feat2])
-                        running_sum += abs((cia/ci) - (cja/cj))
-                    VDM.at[features[feat], features[feat2]] = running_sum
-            VDMdictionary[column] = []
-            VDMdictionary[column].append(VDM)
+    def classification(self, file):
 
-            print(VDMdictionary)
+        file.sort_values(by="class", inplace=True)
+        file.reset_index(drop=True, inplace=True)
 
-    def ci(self, column, feature):
-        count = self.file[column].value_counts()[feature]
-        return count
+        for cv in range(10): #get test and train datasets
+            p = 2               #TUNE currently euclidian distance
+            tot = 0
+            test = file.iloc[cv::10]
+            test.reset_index(drop=True, inplace=True)
+            train = pd.concat([file, test]).drop_duplicates(keep=False)     #getting rid of too much
+            train.reset_index(drop=True, inplace=True)
 
-    def cia(self, column, clas, feature):
-        class_df = self.file[self.file['class'] == clas]
-        count = class_df[column].value_counts()
-        if feature not in count:
-            return 0
-        else:
-            count = count[feature]
-        return count
+            distanceM = pd.DataFrame(index=test.index.values, columns=train.index.values)
+            for testrow, test in test.iterrows():
+                for trainrow, training in train.iterrows():
+                    for indexc, column in train.iteritems():
+                        if indexc in self.discrete:   #need to reference VDM
+                            datapoint = self.VDMdict.get(indexc)
+                            dif = datapoint[test[indexc]][training[indexc]]
+                        elif indexc != "class":
+                            dif = abs(test[indexc] - training[indexc])
+
+                        tot += dif ** p
+                    distance = tot ** (1/p)
+                    distanceM.at[testrow, trainrow] = distance
+
+            for index, val in distanceM.iterrows():
+                print(type(val))
+                min_val = val.idxmin()      #THIS SHOULD WORK, WHY NOT
 
 
 
+    def regression(self, VDM, file):
+        pass
