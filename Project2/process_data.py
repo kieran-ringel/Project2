@@ -18,13 +18,15 @@ class ProcessData:
                 for index,row in file.iterrows():
                     mean += float(file[column][index])
                 mean /= file.shape[0]
-                print(mean)
                 for index,row in file.iterrows():
                     sd += (float(file[column][index]) - mean) ** 2
                 sd /= file.shape[0]
                 sd = math.sqrt(sd)
                 for index, row in file.iterrows():
-                    file[column][index] = (float(file[column][index]) - mean) / sd
+                    if sd == 0:
+                        pass
+                    else:
+                        file[column][index] = (float(file[column][index]) - mean) / sd
         return(file)
 
     def VDMdiscrete(self, file, discrete):

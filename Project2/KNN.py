@@ -19,30 +19,37 @@ class KNN:
         file.reset_index(drop=True, inplace=True)
 
         for cv in range(10): #get test and train datasets
+            print("Run",cv)
             p = 2               #TUNE currently euclidian distance
-            tot = 0
+            total = 0
+            correct = 0
             test = file.iloc[cv::10]
             test.reset_index(drop=True, inplace=True)
             train = pd.concat([file, test]).drop_duplicates(keep=False)     #getting rid of too much
-            train.reset_index(drop=True, inplace=True)
+            test.reset_index(drop=True, inplace=True)
 
             distanceM = pd.DataFrame(index=test.index.values, columns=train.index.values)
-            for testrow, test in test.iterrows():
+            for testrow, testing in test.iterrows():
                 for trainrow, training in train.iterrows():
+                    tot = 0
                     for indexc, column in train.iteritems():
                         if indexc in self.discrete:   #need to reference VDM
                             datapoint = self.VDMdict.get(indexc)
-                            dif = datapoint[test[indexc]][training[indexc]]
+                            dif = datapoint[testing[indexc]][training[indexc]]
                         elif indexc != "class":
-                            dif = abs(test[indexc] - training[indexc])
+                            dif = abs(float(testing[indexc]) - float(training[indexc]))
 
                         tot += dif ** p
                     distance = tot ** (1/p)
                     distanceM.at[testrow, trainrow] = distance
 
             for index, val in distanceM.iterrows():
-                print(type(val))
-                min_val = val.idxmin()      #THIS SHOULD WORK, WHY NOT
+                min_val = val.min()      #THIS SHOULD WORK, WHY NOT
+                col = distanceM.columns[(distanceM == min_val).iloc[index]].astype(int)
+                total += 1
+                if(test['class'][index] == train['class'][col[0]]):
+                    correct += 1
+            print(correct/total * 100,"%")
 
 
 
