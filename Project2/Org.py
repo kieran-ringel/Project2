@@ -5,7 +5,6 @@ class Org():
         self.file_name = file_name
         self.header = header
         self.class_loc = class_loc
-        self.df = self.open()
 
     def open(self):                         #takes all data files and standardizes them so they all class in the same column
                                             #removes headers from any dataset that came with that

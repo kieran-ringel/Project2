@@ -20,8 +20,9 @@ def main():
     #machine = Org('Data/machine.data', [-1], -1) #REMOVE ERP!!!!
     #df = machine.open()
     #ProcessData(df, 'regression', [0, 1])
-    #forest = Reader('Data/forestfires.data', 'regression', [0], -1, [0, 1])
-    #forest.open()
+    #forest = Org('Data/forestfires.data', [0], -1)
+    #df = forest.open()
+    #ProcessData(df, 'regression', [2,3])
 
 if __name__ == '__main__':
     main()
