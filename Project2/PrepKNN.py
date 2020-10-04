@@ -7,7 +7,7 @@ class PrepKNN:
         self.problem = problem
 
     def stratification(self, file):
-        print('strat')
+        #print('strat')
         fold_size = file.shape[0] / 10
         count = file['class'].value_counts(normalize=True)
         fold = [None] * 10
@@ -24,14 +24,21 @@ class PrepKNN:
             fold[cv] = one_fold
         return(fold)
 
-    def getDistanceM(self, test, train, p):
-        print('getting D')
+    def getDistanceM(self, test, train):
+        #print('get D')
+        p = 2  # TUNE currently euclidian distance
         distanceM = pd.DataFrame(index=test.index.values, columns=train.index.values)
+        print('empty distanceM')
+        print(distanceM)
         for testrow, testing in test.iterrows():
+            #print('test row', testrow)
+            #print('lets check and see if a row maintains index', testing)
             for trainrow, training in train.iterrows():
                 tot = 0
-                for indexc, column in train.iteritems():
+                for indexc, column in test.iteritems():     #changed from train.iteritems() to test.iteritems
+                    #print(indexc)
                     if indexc in self.discrete:  # need to reference VDM
+                        #print(indexc)
                         datapoint = self.VDMdict.get(indexc)
                         dif = datapoint[testing[indexc]][training[indexc]]
                     elif indexc != "class":
@@ -41,3 +48,18 @@ class PrepKNN:
                 distance = tot ** (1 / p)
                 distanceM.at[testrow, trainrow] = distance
         return(distanceM)
+
+    def getDistance(self, pt1, pt2):
+        p = 2           #euclidean distance
+        tot = 0
+        for indexc, column in pt1.iteritems():
+            if indexc in self.discrete:  # need to reference VDM
+                datapoint = self.VDMdict.get(indexc)
+                dif = datapoint[pt1[indexc]][pt2[indexc]]
+            elif indexc != "class":
+                dif = abs(float(pt1[indexc]) - float(pt2[indexc]))
+
+            tot += dif ** p
+        distance = tot ** (1 / p)
+        return(distance)
+

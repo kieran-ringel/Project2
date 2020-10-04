@@ -2,13 +2,14 @@ import pandas as pd
 from KNN import KNN
 import math
 class ProcessData:
-    def __init__(self, file, problem, discrete):
+    def __init__(self, file, problem, type, discrete):
         self.file = file
         self.problem = problem
         self.discrete = discrete
+        self.type = type
         VDMdict = self.VDMdiscrete(file, discrete)
         file_norm = self.normalize(file, discrete)
-        KNN(problem, VDMdict, file_norm, discrete)
+        KNN(problem, type, VDMdict, file_norm, discrete)
 
     def normalize(self, file, discrete):
         for column in file.iloc[:,:-1]:
