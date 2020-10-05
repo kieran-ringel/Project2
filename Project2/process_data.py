@@ -7,11 +7,15 @@ class ProcessData:
         self.problem = problem
         self.discrete = discrete
         self.type = type
+        print('Calculating VDM')
         VDMdict = self.VDMdiscrete(file, discrete)
+        print('Normalizing file')
         file_norm = self.normalize(file, discrete)
         KNN(problem, type, VDMdict, file_norm, discrete)
 
     def normalize(self, file, discrete):
+        """Kieran Ringel
+        """
         for column in file.iloc[:,:-1]:
             mean= 0
             sd = 0
@@ -46,13 +50,19 @@ class ProcessData:
                 for feat in range(len(features)):
                     for feat2 in range(len(features)):
                         running_sum = 0
-                        for classify in range(len(classes)):
+                        if self.problem == 'classification':
+                            for classify in range(len(classes)):
+                                ci = self.ci(column, features[feat])
+                                cia = self.cia(column, classes[classify], features[feat])
+                                cj = self.ci(column, features[feat2])
+                                cja = self.cia(column, classes[classify], features[feat2])
+                                running_sum += abs((cia/ci) - (cja/cj))
+                            VDM.at[features[feat], features[feat2]] = running_sum
+                        if self.problem == 'regression':
                             ci = self.ci(column, features[feat])
-                            cia = self.cia(column, classes[classify], features[feat])
                             cj = self.ci(column, features[feat2])
-                            cja = self.cia(column, classes[classify], features[feat2])
-                            running_sum += abs((cia/ci) - (cja/cj))
-                        VDM.at[features[feat], features[feat2]] = running_sum
+                            value = abs((ci/file.shape[0]) - (cj/file.shape[0]))
+                            VDM.at[features[feat], features[feat2]] = value
                 VDMdictionary[column] = []
                 VDMdictionary[column] = VDM
         return(VDMdictionary)

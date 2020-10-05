@@ -28,8 +28,8 @@ class PrepKNN:
         #print('get D')
         p = 2  # TUNE currently euclidian distance
         distanceM = pd.DataFrame(index=test.index.values, columns=train.index.values)
-        print('empty distanceM')
-        print(distanceM)
+        #print('empty distanceM')
+        #print(distanceM)
         for testrow, testing in test.iterrows():
             #print('test row', testrow)
             #print('lets check and see if a row maintains index', testing)
