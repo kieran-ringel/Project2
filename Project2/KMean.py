@@ -8,7 +8,15 @@ import random as rand
 import numpy as np
 from PrepKNN import PrepKNN
 from KNN import KNN
-
+"""This method implements KMeans clustering. First k clusters is initialized to
+the square root of the number of observations. This is a tunable parameter. Then,
+random data points are assigned for centroids. Following this, each data point
+is clustered around a centroid. The the average is calculated from those clusters.
+Average values for each feature are computed and the new centroid is returned. Or
+the row value that is most similar to the average. This is done for every cluster.
+New centroids and clusters are calculated until the centroids no longer change.
+However, since this may make our algorithm run for far too long, a cap of 10
+repitions was implemented. """
 class KMean:
     def __init__(self, problem, VDMdict, file_norm, discrete, reduced):
         self.problem = problem
@@ -16,7 +24,7 @@ class KMean:
         self.file_norm = file_norm
         self.discrete = discrete
         self.reduced = file_norm
-        df = self.beginKMean(file_norm)
+        df = self.beginKMean(file_norm) #Kmeans returns the reduced data set
         self.reduced = df
         #allows for data frame to be returned and easily passed into KNN
     def getDataFrame(self):
@@ -25,11 +33,13 @@ class KMean:
     def beginKMean(self, file):
         file.sort_values(by="class", inplace=True)
         file.reset_index(drop=True, inplace=True)
-        length = file.shape[0]
-        features = file.shape[1] - 1
+        length = file.shape[0] #length of the data set
+        features = file.shape[1] - 1 #columns of the data set
         #creates an estimated k that can be tuned
         estk = math.floor(math.sqrt(length))
         print(estk)
+        #due to issues with cross validation and some really short reduced
+        #data set, estk or clusters must be at least 10. 
         if (estk<10):
             estk = 10
         print(estk)
@@ -39,7 +49,7 @@ class KMean:
         indexes = [0] * estk
         #initializes centroids
         for i in range(estk):
-            index = rand.randint(0,length-1)
+            index = rand.randint(0,length-1) #randomly selects a row to be a centroid
             centroids.append(file.loc[index])
             centloc.append(num)
             num += 1
@@ -49,9 +59,10 @@ class KMean:
         return (df)
     
     #finds which centroid a row is closest to, and chooses that centroid
+    #centroid is represented with an integer value
     def closestDist(self,width, p, row,centroids):
         shortD = 10000000000
-        chosen = 0
+        chosen = 0 
         for i in range (len(centroids)):
             d = self.getDist(row,width,centroids[i][1], p)
             if (d<shortD):
@@ -69,7 +80,7 @@ class KMean:
                 dif = d
                 chosen = row
         return(chosen)
-    #gets the distance between two data points
+    #gets the distance between two numerical data points
     def getDist(self, row, width, i, p):
         tot = 0
         dif = 0
@@ -82,7 +93,8 @@ class KMean:
         distance = tot ** (1 / p)
         return(distance)
 
-     #calculates new centroids based on means                        
+    #calculates new centroids based on means
+    #computes the average for each feature
     def getMean(self,width, file, pals, centroids):
         newcent = []
         for i in range(len(centroids) ):
@@ -101,9 +113,10 @@ class KMean:
                 count = 1
             for l in range(width):
                 featureavg[l] = featureavg[l]/count
-            
+            #finds row most like the computed average for the cluster
             newc = self.closestVal(width,featureavg, file)
             newcent.append(newc)
+        #returns new centroids
         return(newcent)
 
     
@@ -117,6 +130,7 @@ class KMean:
             rows = []
             clusters = []
             num = 1
+            #for every row, find which centroid the row should cluster to
             for row in file.iterrows():
                 cent = self.closestDist(width, p, row, centroids)
                 rows.append(num)
@@ -124,11 +138,12 @@ class KMean:
                 num += 1
             rows = np.array(rows)
             clusters = np.array(clusters)
+            #centroids and their indexes or integer representations
             pals = list(zip(rows, clusters))
             centroids = self.getMean(width, file,pals,centroids)
             increment +=1
         df = pd.DataFrame(columns=file.columns)
-        
+        #puts chosen centroids into a data frame
         for j in range(len(centroids)):
             row = []
             for i in range (width + 1):
