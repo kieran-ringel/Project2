@@ -25,7 +25,7 @@ class PrepKNN:
         return(fold)
 
     def getDistanceM(self, test, train):
-        p = 2  # TUNE currently euclidian distance
+        p = 4  # TUNE currently euclidian distance
         distanceM = pd.DataFrame(index=test.index.values, columns=train.index.values)
         for testrow, testing in test.iterrows():
             for trainrow, training in train.iterrows():

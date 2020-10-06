@@ -15,23 +15,23 @@ class ProcessData:
 
     def normalize(self, file, discrete):
         """Kieran Ringel
-        """
+        Normalizes all real valued data points using z score normalization"""
         for column in file.iloc[:,:-1]:
             mean= 0
             sd = 0
             if column not in discrete:
                 for index,row in file.iterrows():
                     mean += float(file[column][index])
-                mean /= file.shape[0]
+                mean /= file.shape[0]                   #calcualates the mean value for each attribute
                 for index,row in file.iterrows():
                     sd += (float(file[column][index]) - mean) ** 2
                 sd /= file.shape[0]
-                sd = math.sqrt(sd)
+                sd = math.sqrt(sd)                      #calculated the standard deviation for each attribute
                 for index, row in file.iterrows():
                     if sd == 0:
-                        pass
+                        file[column][index] = mean      #gets rid of issue of sd = 0
                     else:
-                        file[column][index] = (float(file[column][index]) - mean) / sd
+                        file[column][index] = (float(file[column][index]) - mean) / sd  #changed value in file to standardized value
         return(file)
 
     def VDMdiscrete(self, file, discrete):
