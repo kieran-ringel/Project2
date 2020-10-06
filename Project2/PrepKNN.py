@@ -25,20 +25,14 @@ class PrepKNN:
         return(fold)
 
     def getDistanceM(self, test, train):
-        #print('get D')
         p = 2  # TUNE currently euclidian distance
         distanceM = pd.DataFrame(index=test.index.values, columns=train.index.values)
-        #print('empty distanceM')
-        #print(distanceM)
         for testrow, testing in test.iterrows():
-            #print('test row', testrow)
-            #print('lets check and see if a row maintains index', testing)
             for trainrow, training in train.iterrows():
                 tot = 0
                 for indexc, column in test.iteritems():     #changed from train.iteritems() to test.iteritems
                     #print(indexc)
                     if indexc in self.discrete:  # need to reference VDM
-                        #print(indexc)
                         datapoint = self.VDMdict.get(indexc)
                         dif = datapoint[testing[indexc]][training[indexc]]
                     elif indexc != "class":

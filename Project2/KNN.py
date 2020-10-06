@@ -14,9 +14,6 @@ class KNN:
         self.startKNN(file_norm, prep)
 
     def startKNN(self, file, prep):
-        file.sort_values(by="class", inplace=True)
-        file.reset_index(drop=True, inplace=True)
-
         #get every tenth as tuning
         tune = file.iloc[::10]
         tune.reset_index(drop=True, inplace=True)
@@ -26,6 +23,9 @@ class KNN:
 
         k = self.tuningk(tune, file, prep)
         print('k is', k)
+
+        file.sort_values(by="class", inplace=True)
+        file.reset_index(drop=True, inplace=True)
 
         if self.problem == "classification" and self.type == 'none':
             fold = prep.stratification(file)
@@ -44,10 +44,10 @@ class KNN:
             fold = prep.stratification(reduced_file)
             self.tenfold(fold, prep, k)
         if self.problem == 'regression' and self.type == 'edited':
-            file = self.regEditedKNN(prep, file, tune, k)
+            new_file = self.regEditedKNN(prep, file, tune, k)
             fold = [None] * 10
             for cv in range(10):
-                to_test = file.iloc[cv::10]
+                to_test = new_file.iloc[cv::10]
                 to_test.reset_index(drop=True, inplace=True)
                 fold[cv] = to_test
             self.tenfold(fold, prep, k)
@@ -83,8 +83,8 @@ class KNN:
         tot_loss = 0
         for cv in range(10):  # get test and train datasets
             print("Run", cv+1)
-            p = 2  # TUNE currently euclidian distance
             test = fold[cv]
+            print(test)
             train_list = fold[:cv] + fold[cv+1:]
             train = pd.concat(train_list)
             train.reset_index(drop=True, inplace=True)
@@ -115,7 +115,7 @@ class KNN:
 
             voted_class = knn_classes.mode()[0]
             if(test['class'][row] == voted_class): #sees if it has been classified correctly
-                m += 0    #increments count of correct classifications
+                m += 0
             else:
                 m += 1
         loss = m/test.shape[0]
@@ -134,9 +134,7 @@ class KNN:
                 first_term = (1/math.sqrt(2 * math.pi)) ** (file.shape[1] - 1)
                 exp = math.exp((-1/2)*(small/h ** 2))
                 w = first_term * exp
-
                 true_index = min_vals.index[(min_vals == small)].astype(int)
-
                 numerator += float(w) * float(file['class'][true_index[0]])
                 denominator += w
             predicted = numerator/denominator
@@ -151,6 +149,7 @@ class KNN:
         z = pd.DataFrame()
         z = z.append(file.sample(n=1))
         file.drop(z.index)
+        print(z)
         for row, rowitem in file.iterrows():
             min = 1000
             for xprime, item1 in z.iterrows():
@@ -160,14 +159,18 @@ class KNN:
                     closest = item1
             if self.problem == 'classification':
                 if closest['class'] != rowitem['class']:
+
                     rowitem = rowitem.to_frame()
                     rowitem = rowitem.transpose()
                     z = z.append(rowitem)
             if self.problem == 'regression':
+                print(closest['class'])
+                print(rowitem['class'])
                 if not (float(closest['class']) <= float(rowitem['class']) * (1 + ET) and float(closest['class']) >= float(rowitem['class']) * (1 - ET)):
                     rowitem = rowitem.to_frame()
                     rowitem = rowitem.transpose()
                     z = z.append(rowitem)
+            print(z)
         z.reset_index(drop=True, inplace=True)
         print(z)
         return(z)
@@ -212,13 +215,10 @@ class KNN:
                 train = train1.append(train2)
                 test = test.to_frame()
                 test = test.transpose()
-                #train.reset_index(drop=True, inplace=True)
-                #test.reset_index(drop=True, inplace=True)
                 distanceM = prep.getDistanceM(test, train)
                 class_results = self.regression(distanceM, test, file, n)
                 if float(test['class'][datarow]) <= float(class_results[1]) * (1 + ET) and float(test['class'][datarow]) >= float(class_results[1]) * (1 - ET):
                     file = file.drop([datarow])
-                print(file)
                 distanceM = prep.getDistanceM(tune, file)
                 tune_result = self.regression(distanceM, tune, file, n)
                 newLoss = tune_result[0]
@@ -226,6 +226,7 @@ class KNN:
                     loss = newLoss
             if newLoss != loss:
                 print(file)
+                return(file)
                 break
 
 
