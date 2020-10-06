@@ -1,5 +1,7 @@
 import pandas as pd
 from KNN import KNN
+from KMean import KMean
+from Kmedoids import Kmedoids
 import math
 class ProcessData:
     def __init__(self, file, problem, type, discrete):
@@ -11,15 +13,15 @@ class ProcessData:
         VDMdict = self.VDMdiscrete(file, discrete)
         print('Normalizing file')
         file_norm = self.normalize(file, discrete)
+        #if type is reducedmed, Kmedoids is called and a reduced data set is returned.
+        #this data set is then passed into KNN. Same for if type is reducedmean
         if (type == 'reducedmed'):
             reduced = Kmedoids(self.problem, VDMdict, file_norm, self.discrete, file_norm)
             file_norm = reduced.getDataFrame()
-            print(file_norm)
             type = 'none'
         if (type == 'reducedmean'):
             reduced = KMean(self.problem, VDMdict, file_norm, self.discrete, file_norm)
             file_norm = reduced.getDataFrame()
-            print(file_norm)
             type = 'none' 
         KNN(problem, type, VDMdict, file_norm, discrete)
         
