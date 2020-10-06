@@ -11,7 +11,18 @@ class ProcessData:
         VDMdict = self.VDMdiscrete(file, discrete)
         print('Normalizing file')
         file_norm = self.normalize(file, discrete)
+        if (type == 'reducedmed'):
+            reduced = Kmedoids(self.problem, VDMdict, file_norm, self.discrete, file_norm)
+            file_norm = reduced.getDataFrame()
+            print(file_norm)
+            type = 'none'
+        if (type == 'reducedmean'):
+            reduced = KMean(self.problem, VDMdict, file_norm, self.discrete, file_norm)
+            file_norm = reduced.getDataFrame()
+            print(file_norm)
+            type = 'none' 
         KNN(problem, type, VDMdict, file_norm, discrete)
+        
 
     def normalize(self, file, discrete):
         """Kieran Ringel
