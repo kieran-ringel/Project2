@@ -8,7 +8,8 @@ import random as rand
 import numpy as np
 from PrepKNN import PrepKNN
 from KNN import KNN
-"""This method implements KMeans clustering. First k clusters is initialized to
+"""Cierra Wallin
+This method implements KMeans clustering. First k clusters is initialized to
 the square root of the number of observations. This is a tunable parameter. Then,
 random data points are assigned for centroids. Following this, each data point
 is clustered around a centroid. The the average is calculated from those clusters.

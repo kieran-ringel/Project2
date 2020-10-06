@@ -9,7 +9,7 @@ def main():
     information to be removed, and the column location of the class so that all the classes can be put in the same column.
     The second line takes the instance of Org and calls the open method, returning the pandas dataframe of the file.
     The third line creates an instance of ProcessData, the arguments are the dataframe created in Org.open(), classification or
-    regression, the type (none, edited, condensed), and an array of the columns with discrete values."""
+    regression, the type (none, edited, condensed, reducedmed, reducedmean), and an array of the columns with discrete values."""
 
     #print('glass')
     #glass = Org('Data/glass.data', [-1], -1)
@@ -18,7 +18,7 @@ def main():
     print('image')
     img = Org('Data/segmentation.data', [0, 1, 2, 3, 4], 0)
     df = img.open()
-    ProcessData(df, 'classification', 'none', [-1])
+    ProcessData(df, 'classification', 'condensed', [-1])
     #print('vote')
     #vote = Org('Data/house-votes-84.data', [-1], 0)
     #df = vote.open()

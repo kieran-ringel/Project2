@@ -5,7 +5,8 @@ import math
 import random as rand
 import numpy as np
 import statistics
-"""This method implements K-Medoids clustering. First k clusters is initialized to
+""" Cierra Wallin
+This method implements K-Medoids clustering. First k clusters is initialized to
 the square root of the number of observations. This is a tunable parameter. Then,
 random data points are assigned for medoids. Following this, each data point
 is clustered around a medoid. The the median is calculated from those clusters.
